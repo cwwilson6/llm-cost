@@ -54,6 +54,8 @@ def _build_parser() -> argparse.ArgumentParser:
     compare = subparsers.add_parser("compare", parents=[global_opts], help="rank models by cost for a fixed workload")
     compare.add_argument("--input", type=int, required=True)
     compare.add_argument("--output", type=int, required=True)
+    compare.add_argument("--cached", type=int, default=0, help="cached input tokens per call")
+    compare.add_argument("--cache-write", type=int, default=0, dest="cache_write", help="cache write tokens per call")
     compare.add_argument("--calls", type=int, default=1)
     compare.add_argument("--provider")
     compare.add_argument("--models", help="comma-separated shortlist, otherwise every priced model")
@@ -181,7 +183,16 @@ def _run_compare(args, table) -> int:
     if args.models:
         models = [name.strip() for name in args.models.split(",") if name.strip()]
 
-    rows = compare_models(table, args.input, args.output, provider=args.provider, models=models, calls=args.calls)
+    rows = compare_models(
+        table,
+        args.input,
+        args.output,
+        provider=args.provider,
+        models=models,
+        calls=args.calls,
+        cached_input_tokens=args.cached,
+        cache_write_tokens=args.cache_write,
+    )
 
     if args.json:
         print(json.dumps([
@@ -198,7 +209,12 @@ def _run_compare(args, table) -> int:
         ], indent=2))
         return 0
 
-    print(f"{_fmt_int(args.input)} in + {_fmt_int(args.output)} out, {args.calls} call{_plural(args.calls)}, prices as of {table.as_of}")
+    summary = f"{_fmt_int(args.input)} in + {_fmt_int(args.output)} out"
+    if args.cached:
+        summary += f" + {_fmt_int(args.cached)} cached"
+    if args.cache_write:
+        summary += f" + {_fmt_int(args.cache_write)} cache write"
+    print(f"{summary}, {args.calls} call{_plural(args.calls)}, prices as of {table.as_of}")
     print()
     table_rows = [
         [row.model, row.provider, _fmt_price(row.input_price), _fmt_price(row.output_price), _fmt_money(row.cost, table), f"{row.vs_cheapest:.1f}x"]

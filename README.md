@@ -125,7 +125,9 @@ claude-opus-5      anthropic     5.00     25.00  $0.0750         5.0x
 claude-fable-5     anthropic    10.00     50.00  $0.1500        10.0x
 ```
 
-`--models a,b,c` narrows the comparison to a shortlist.
+`--models a,b,c` narrows the comparison to a shortlist. `--cached` and
+`--cache-write` work the same as in `estimate`, for comparing models on a
+workload that reuses a cached prefix rather than a cold one.
 
 ### Inspect the table
 

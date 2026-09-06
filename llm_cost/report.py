@@ -129,7 +129,17 @@ class ComparisonRow:
     vs_cheapest: float
 
 
-def compare_models(table, input_tokens: int, output_tokens: int, *, provider=None, models=None, calls: int = 1):
+def compare_models(
+    table,
+    input_tokens: int,
+    output_tokens: int,
+    *,
+    provider=None,
+    models=None,
+    calls: int = 1,
+    cached_input_tokens: int = 0,
+    cache_write_tokens: int = 0,
+):
     names = models if models else sorted(table.models)
 
     priced = []
@@ -137,7 +147,14 @@ def compare_models(table, input_tokens: int, output_tokens: int, *, provider=Non
         price = table.resolve(name)
         if provider and price.provider != provider:
             continue
-        result = estimate_cost(price, input_tokens=input_tokens, output_tokens=output_tokens, calls=calls)
+        result = estimate_cost(
+            price,
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+            cached_input_tokens=cached_input_tokens,
+            cache_write_tokens=cache_write_tokens,
+            calls=calls,
+        )
         priced.append((price, result.total_cost))
 
     priced.sort(key=lambda item: item[1])

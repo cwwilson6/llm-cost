@@ -132,6 +132,34 @@ def test_compare_orders_cheapest_first(capsys):
     assert costs == sorted(costs)
 
 
+def test_compare_accounts_for_cached_tokens(tmp_path, capsys):
+    prices = tmp_path / "prices.json"
+    prices.write_text(json.dumps({
+        "replace": True,
+        "models": {
+            "warm-cache": {"provider": "x", "input": 5.0, "output": 5.0, "cache_write": 50.0},
+            "cold-cache": {"provider": "x", "input": 5.0, "output": 5.0, "cache_write": 5.0},
+        },
+    }))
+    code = main([
+        "--pricing", str(prices),
+        "compare", "--input", "0", "--output", "0", "--cache-write", "1000000", "--json",
+    ])
+    out = capsys.readouterr().out
+    assert code == 0
+    rows = json.loads(out)
+    assert rows[0]["model"] == "cold-cache"
+
+
+def test_compare_text_output_mentions_cached_tokens_in_summary(tmp_path, capsys):
+    prices = tmp_path / "prices.json"
+    prices.write_text(json.dumps({"replace": True, "models": {"only": {"provider": "x", "input": 1.0, "output": 1.0}}}))
+    code = main(["--pricing", str(prices), "compare", "--input", "100", "--output", "10", "--cached", "5000"])
+    out = capsys.readouterr().out
+    assert code == 0
+    assert "5,000 cached" in out
+
+
 def test_estimate_with_non_usd_pricing_uses_symbol_and_precision(tmp_path, capsys):
     prices = tmp_path / "eur.json"
     prices.write_text(json.dumps({

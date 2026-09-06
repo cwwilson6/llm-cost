@@ -69,6 +69,20 @@ def test_compare_models_orders_cheapest_first_and_computes_ratio():
     assert rows[1].vs_cheapest == pytest.approx(3.0)
 
 
+def test_compare_models_accounts_for_cached_and_cache_write_tokens():
+    table = parse_pricing({
+        "replace": True,
+        "models": {
+            # cheaper sticker price, but a pricier cache write makes it worse
+            # for a workload that leans on caching
+            "warm-cache": {"provider": "x", "input": 5.0, "output": 5.0, "cache_write": 50.0},
+            "cold-cache": {"provider": "x", "input": 5.0, "output": 5.0, "cache_write": 5.0},
+        },
+    })
+    rows = compare_models(table, input_tokens=0, output_tokens=0, cache_write_tokens=1_000_000)
+    assert [row.model for row in rows] == ["cold-cache", "warm-cache"]
+
+
 def test_compare_models_filters_by_provider():
     table = default_pricing()
     rows = compare_models(table, input_tokens=10_000, output_tokens=1_000, provider="anthropic")
