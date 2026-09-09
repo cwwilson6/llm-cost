@@ -18,9 +18,18 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Topic :: Utilities",
 ]
 dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/cwwilson6/llm-cost"
+Repository = "https://github.com/cwwilson6/llm-cost"
+Issues = "https://github.com/cwwilson6/llm-cost/issues"
 
 [project.optional-dependencies]
 dev = ["pytest>=7"]
