@@ -19,7 +19,10 @@ from .report import (
 )
 from .usage import UsageFormatError, UsageProblem, UsageRecord, load_usage
 
+__version__ = "0.1.0"
+
 __all__ = [
+    "__version__",
     "CostResult",
     "estimate_cost",
     "ModelPrice",

@@ -6,6 +6,7 @@ import argparse
 import json
 import sys
 
+from . import __version__
 from .pricing import PricingError, UnknownModelError, default_pricing, load_pricing
 from .cost import estimate_cost
 from .usage import UsageFormatError, load_usage
@@ -34,6 +35,7 @@ def _build_parser() -> argparse.ArgumentParser:
     global_opts.add_argument("--json", action="store_true", help="emit machine-readable JSON instead of a table")
 
     parser = argparse.ArgumentParser(prog="llm-cost", parents=[global_opts])
+    parser.add_argument("--version", action="version", version=f"llm-cost {__version__}")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     estimate = subparsers.add_parser("estimate", parents=[global_opts], help="cost of one call, or a batch of identical calls")

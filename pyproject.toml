@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "llm-cost"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Estimate and report LLM token costs from an overridable price table"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -39,3 +39,6 @@ dev = ["pytest>=7"]
 
 [tool.setuptools]
 packages = ["llm_cost"]
+
+[tool.setuptools.dynamic]
+version = { attr = "llm_cost.__version__" }

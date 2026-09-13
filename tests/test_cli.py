@@ -1,7 +1,18 @@
 import io
 import json
 
+import pytest
+
+from llm_cost import __version__
 from llm_cost.cli import main
+
+
+def test_version_flag_prints_version_and_exits_zero(capsys):
+    with pytest.raises(SystemExit) as exc_info:
+        main(["--version"])
+    out = capsys.readouterr().out
+    assert exc_info.value.code == 0
+    assert out.strip() == f"llm-cost {__version__}"
 
 
 def test_estimate_prints_table_and_exits_zero(capsys):
