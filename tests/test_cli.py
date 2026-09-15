@@ -196,6 +196,15 @@ def test_estimate_json_includes_currency(tmp_path, capsys):
     assert data["currency"] == "JPY"
 
 
+def test_bad_pricing_value_exits_2_instead_of_crashing(tmp_path, capsys):
+    prices = tmp_path / "prices.json"
+    prices.write_text(json.dumps({"models": {"claude-opus-5": {"input": "not-a-number", "output": 1.0}}}))
+    code = main(["--pricing", str(prices), "models"])
+    err = capsys.readouterr().err
+    assert code == 2
+    assert "claude-opus-5" in err
+
+
 def test_models_lists_the_built_in_table(capsys):
     code = main(["models"])
     out = capsys.readouterr().out

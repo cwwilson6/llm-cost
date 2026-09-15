@@ -95,6 +95,14 @@ class PricingTable:
         raise UnknownModelError(name)
 
 
+def _price_field(name: str, data: dict, field: str, default_field: str = None):
+    value = data[field] if field in data else data[default_field]
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        raise PricingError(f"pricing entry for {name!r} has a non-numeric {field!r}: {value!r}")
+
+
 def _build_models(raw: dict) -> dict:
     models = {}
     for name, data in raw.items():
@@ -103,10 +111,10 @@ def _build_models(raw: dict) -> dict:
         models[name] = ModelPrice(
             name=name,
             provider=data.get("provider", "unknown"),
-            input=float(data["input"]),
-            output=float(data["output"]),
-            cached_input=float(data.get("cached_input", data["input"])),
-            cache_write=float(data.get("cache_write", data["input"])),
+            input=_price_field(name, data, "input"),
+            output=_price_field(name, data, "output"),
+            cached_input=_price_field(name, data, "cached_input", "input"),
+            cache_write=_price_field(name, data, "cache_write", "input"),
         )
     return models
 

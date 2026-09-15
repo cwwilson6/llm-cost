@@ -79,6 +79,16 @@ def test_parse_pricing_rejects_entry_missing_prices():
         parse_pricing({"models": {"broken-model": {"provider": "internal"}}})
 
 
+def test_parse_pricing_rejects_non_numeric_input_price():
+    with pytest.raises(PricingError):
+        parse_pricing({"models": {"broken-model": {"input": "cheap", "output": 1.0}}})
+
+
+def test_parse_pricing_rejects_null_cached_input_price():
+    with pytest.raises(PricingError):
+        parse_pricing({"models": {"broken-model": {"input": 1.0, "output": 1.0, "cached_input": None}}})
+
+
 def test_default_pricing_is_usd_with_default_precision():
     table = default_pricing()
     assert table.currency == "USD"
