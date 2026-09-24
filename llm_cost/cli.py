@@ -29,6 +29,20 @@ def _plural(n: int) -> str:
     return "" if n == 1 else "s"
 
 
+def _nonneg_int(value: str) -> int:
+    parsed = int(value)
+    if parsed < 0:
+        raise argparse.ArgumentTypeError(f"must be >= 0, got {parsed}")
+    return parsed
+
+
+def _positive_int(value: str) -> int:
+    parsed = int(value)
+    if parsed < 1:
+        raise argparse.ArgumentTypeError(f"must be >= 1, got {parsed}")
+    return parsed
+
+
 def _build_parser() -> argparse.ArgumentParser:
     global_opts = argparse.ArgumentParser(add_help=False)
     global_opts.add_argument("--pricing", metavar="PATH", help="JSON file overriding or replacing the built-in price table")
@@ -40,11 +54,11 @@ def _build_parser() -> argparse.ArgumentParser:
 
     estimate = subparsers.add_parser("estimate", parents=[global_opts], help="cost of one call, or a batch of identical calls")
     estimate.add_argument("--model", required=True)
-    estimate.add_argument("--input", type=int, default=0, help="input tokens per call")
-    estimate.add_argument("--output", type=int, default=0, help="output tokens per call")
-    estimate.add_argument("--cached", type=int, default=0, help="cached input tokens per call")
-    estimate.add_argument("--cache-write", type=int, default=0, dest="cache_write", help="cache write tokens per call")
-    estimate.add_argument("--calls", type=int, default=1)
+    estimate.add_argument("--input", type=_nonneg_int, default=0, help="input tokens per call")
+    estimate.add_argument("--output", type=_nonneg_int, default=0, help="output tokens per call")
+    estimate.add_argument("--cached", type=_nonneg_int, default=0, help="cached input tokens per call")
+    estimate.add_argument("--cache-write", type=_nonneg_int, default=0, dest="cache_write", help="cache write tokens per call")
+    estimate.add_argument("--calls", type=_positive_int, default=1)
 
     report = subparsers.add_parser("report", parents=[global_opts], help="cost of a JSONL usage log")
     report.add_argument("path", nargs="?", default="-", help="usage log path, or - to read stdin (default)")
@@ -54,11 +68,11 @@ def _build_parser() -> argparse.ArgumentParser:
     report.add_argument("--until", help="only include records with a 'date' on or before this (YYYY-MM-DD)")
 
     compare = subparsers.add_parser("compare", parents=[global_opts], help="rank models by cost for a fixed workload")
-    compare.add_argument("--input", type=int, required=True)
-    compare.add_argument("--output", type=int, required=True)
-    compare.add_argument("--cached", type=int, default=0, help="cached input tokens per call")
-    compare.add_argument("--cache-write", type=int, default=0, dest="cache_write", help="cache write tokens per call")
-    compare.add_argument("--calls", type=int, default=1)
+    compare.add_argument("--input", type=_nonneg_int, required=True)
+    compare.add_argument("--output", type=_nonneg_int, required=True)
+    compare.add_argument("--cached", type=_nonneg_int, default=0, help="cached input tokens per call")
+    compare.add_argument("--cache-write", type=_nonneg_int, default=0, dest="cache_write", help="cache write tokens per call")
+    compare.add_argument("--calls", type=_positive_int, default=1)
     compare.add_argument("--provider")
     compare.add_argument("--models", help="comma-separated shortlist, otherwise every priced model")
 

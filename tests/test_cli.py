@@ -50,6 +50,30 @@ def test_estimate_total_tokens_includes_cached_and_cache_write(capsys):
     assert "73,800" in total_line
 
 
+def test_estimate_negative_input_exits_2(capsys):
+    with pytest.raises(SystemExit) as exc_info:
+        main(["estimate", "--model", "claude-opus-5", "--input", "-1", "--output", "0"])
+    err = capsys.readouterr().err
+    assert exc_info.value.code == 2
+    assert "--input" in err
+
+
+def test_estimate_zero_calls_exits_2(capsys):
+    with pytest.raises(SystemExit) as exc_info:
+        main(["estimate", "--model", "claude-opus-5", "--input", "1", "--calls", "0"])
+    err = capsys.readouterr().err
+    assert exc_info.value.code == 2
+    assert "--calls" in err
+
+
+def test_compare_negative_cached_exits_2(capsys):
+    with pytest.raises(SystemExit) as exc_info:
+        main(["compare", "--input", "100", "--output", "10", "--cached", "-5"])
+    err = capsys.readouterr().err
+    assert exc_info.value.code == 2
+    assert "--cached" in err
+
+
 def test_report_missing_file_exits_2(capsys):
     code = main(["report", "/tmp/does-not-exist-llm-cost.jsonl"])
     err = capsys.readouterr().err
