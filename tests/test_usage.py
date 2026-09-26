@@ -78,3 +78,24 @@ def test_strict_does_not_raise_when_clean():
     records, problems = load_usage(ANTHROPIC_LINE, strict=True)
     assert len(records) == 1
     assert not problems
+
+
+def test_negative_token_count_becomes_a_problem_not_a_negative_cost():
+    line = '{"model":"claude-opus-5","usage":{"input_tokens":-100,"output_tokens":10}}'
+    records, problems = load_usage(line)
+    assert not records
+    assert len(problems) == 1
+    assert "input_tokens is negative" in problems[0].reason
+
+
+def test_openai_cached_tokens_exceeding_prompt_tokens_becomes_a_problem():
+    # a cached_tokens value larger than prompt_tokens is malformed input,
+    # not a call with negative input tokens
+    line = (
+        '{"model":"gpt-4o-mini","usage":{"prompt_tokens":100,"completion_tokens":10,'
+        '"prompt_tokens_details":{"cached_tokens":500}}}'
+    )
+    records, problems = load_usage(line)
+    assert not records
+    assert len(problems) == 1
+    assert "input_tokens is negative" in problems[0].reason

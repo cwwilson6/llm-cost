@@ -59,6 +59,16 @@ def _parse_record(data) -> UsageRecord:
     else:
         raise UsageFormatError("usage object has neither Anthropic nor OpenAI token fields")
 
+    counts = {
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
+        "cached_input_tokens": cached_input_tokens,
+        "cache_write_tokens": cache_write_tokens,
+    }
+    for field_name, count in counts.items():
+        if count < 0:
+            raise UsageFormatError(f"{field_name} is negative: {count}")
+
     return UsageRecord(
         model=model,
         fields=data,
